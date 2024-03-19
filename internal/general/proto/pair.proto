@@ -1,0 +1,55 @@
+syntax = "proto3";
+
+package proto;
+
+option go_package = "GophKeeper/internal/server/adapter/proto";
+
+message PairMsg {
+  uint64 id = 1;
+  string login = 2;
+  string password_hash = 3;
+  string metadata = 4;
+}
+
+message CreatePairRequest {
+  string  token = 1;
+  PairMsg pair = 2;
+}
+
+message CreatePairResponse {
+  PairMsg pair = 1;
+  string error = 2;
+}
+
+message GetPairRequest {
+  string token = 1;
+}
+
+message GetPairResponse {
+  repeated PairMsg pairs = 1;
+  string error = 2;
+}
+
+message UpdatePairRequest{
+  PairMsg pair = 1;
+}
+
+message UpdatePairResponse {
+  PairMsg pair = 1;
+  string error = 2;
+}
+
+message DeletePairRequest {
+  string token = 1;
+}
+
+message DeletePairResponse{
+  string error = 1;
+}
+
+service Pair {
+  rpc CreatePair(CreatePairRequest) returns (CreatePairResponse);
+  rpc GetPair(GetPairRequest) returns (GetPairResponse);
+  rpc UpdatePair(UpdatePairRequest) returns (UpdatePairResponse);
+  rpc DeletePair(DeletePairRequest) returns (DeletePairResponse);
+}

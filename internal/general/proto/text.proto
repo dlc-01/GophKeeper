@@ -1,0 +1,54 @@
+syntax = "proto3";
+
+package proto;
+
+option go_package = "GophKeeper/internal/server/adapter/proto";
+
+message NoteMsg {
+  uint64 id = 1;
+  string note = 2;
+  string metadata = 3;
+}
+
+message CreateTextRequest {
+  string token = 1;
+  NoteMsg note = 2;
+}
+
+message CreateTextResponse {
+  NoteMsg note = 1;
+  string error = 2;
+}
+
+message GetTextRequest {
+  string token = 1;
+}
+
+message GetTextResponse {
+  repeated NoteMsg notes = 1;
+  string error = 2;
+}
+
+message UpdateTextRequest{
+  NoteMsg note = 1;
+}
+
+message UpdateTextResponse {
+  NoteMsg note = 1;
+  string error = 2;
+}
+
+message DeleteTextResponse{
+  string error = 1;
+}
+
+message DeleteTextRequest{
+  string token = 1;
+}
+
+service Text {
+  rpc CreateText(CreateTextRequest) returns (CreateTextResponse);
+  rpc GetText(GetTextRequest) returns (GetTextResponse);
+  rpc UpdateText(UpdateTextRequest) returns (UpdateTextResponse);
+  rpc DeleteText(DeleteTextRequest) returns (DeleteTextResponse);
+}
