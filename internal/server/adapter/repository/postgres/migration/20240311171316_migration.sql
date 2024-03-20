@@ -59,7 +59,7 @@ CREATE TABLE  IF NOT EXISTS GophKepper.bank
     card_holder varchar NOT NULL,
     expiration_date timestamp NOT NULL,
     security_code varchar NOT NULL,
-    nonce_hex text,
+    nonce_hex text NOT NULL,
     metadata jsonb,
     created_at  timestamp NOT NULL DEFAULT now(),
     updated_at  timestamp NOT NULL DEFAULT now()
