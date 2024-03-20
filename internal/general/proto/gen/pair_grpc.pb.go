@@ -2,9 +2,9 @@
 // versions:
 // - protoc-gen-go-grpc v1.3.0
 // - protoc             v4.25.3
-// source: proto/pair.proto
+// source: pair.proto
 
-package proto
+package gen
 
 import (
 	context "context"
@@ -216,5 +216,5 @@ var Pair_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "proto/pair.proto",
+	Metadata: "pair.proto",
 }

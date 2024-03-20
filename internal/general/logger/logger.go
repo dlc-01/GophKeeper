@@ -14,13 +14,15 @@ const (
 	ProductMode = "product"
 )
 
-type ConfigLog struct {
-	AppMode              string
-	LoggerDirectory      string
-	LoggerFileMaxSize    int
-	LoggerFileMaxBackups int
-	LoggerFileMaxAge     int
-	LoggerFileCompress   bool
+type ConfLogger struct {
+	AppMod string `env:"APP_ENV" envDefault:"develop" json:"AppMod"`
+	File   struct {
+		Directory  string `env:"LOGGER_DIRECTORY" envDefault:"temp/logs/" json:"LoggerDirectory"`
+		MaxSize    int    `env:"LOGGER_FILE_MAX_SIZE" envDefault:"1" json:"LoggerMaxSize"`
+		MaxBackups int    `env:"LOGGER_FILE_MAX_BACKUPS" envDefault:"1" json:"LoggerMaxBackups"`
+		MaxAge     int    `env:"LOGGER_FILE_MAX_AGE" envDefault:"1" json:"LoggerMaxAge"`
+		Compress   bool   `env:"LOGGER_FILE_COMPRESS" envDefault:"true" json:"LoggerCompress"`
+	}
 }
 
 type Logger struct {
@@ -28,8 +30,8 @@ type Logger struct {
 }
 
 // InitLogger — initialization function of zap logger.
-func Initialize(cfg ConfigLog) (*Logger, error) {
-	switch cfg.AppMode {
+func Initialize(cfg ConfLogger) (*Logger, error) {
+	switch cfg.AppMod {
 	case DevelopMode:
 		logger, err := zap.NewDevelopment()
 		if err != nil {
@@ -45,17 +47,17 @@ func Initialize(cfg ConfigLog) (*Logger, error) {
 		loggerConf.EncodeTime = zapcore.ISO8601TimeEncoder
 		fileEncoder := zapcore.NewJSONEncoder(loggerConf)
 		defaultLogLevel := zapcore.DebugLevel
-		dir := fmt.Sprintf("%v/", cfg.LoggerDirectory)
+		dir := fmt.Sprintf("%v/", cfg.File.Directory)
 		err := os.MkdirAll(dir, 0777)
 		if err != nil {
 			return nil, err
 		}
 		writer := zapcore.AddSync(&lumberjack.Logger{
 			Filename:   fmt.Sprintf("%v/%v.log", dir, time.Now().Format("2022-02-24")),
-			MaxSize:    cfg.LoggerFileMaxSize,
-			MaxBackups: cfg.LoggerFileMaxBackups,
-			MaxAge:     cfg.LoggerFileMaxAge,
-			Compress:   cfg.LoggerFileCompress,
+			MaxSize:    cfg.File.MaxSize,
+			MaxBackups: cfg.File.MaxBackups,
+			MaxAge:     cfg.File.MaxAge,
+			Compress:   cfg.File.Compress,
 		})
 		core := zapcore.NewTee(
 			zapcore.NewCore(fileEncoder, writer, defaultLogLevel))
@@ -66,34 +68,4 @@ func Initialize(cfg ConfigLog) (*Logger, error) {
 	default:
 		return nil, fmt.Errorf("error while: creating logger, not supported mode")
 	}
-}
-
-// Fatalf — function that equals Fatalf error in the logger.
-func (l Logger) Fatalf(format string, opts ...any) {
-	l.SugaredLogger.Fatalf(format, opts)
-}
-
-// Errorf — function that equals Errorf error in the logger.
-func (l Logger) Errorf(format string, opts ...any) {
-	l.SugaredLogger.Errorf(format, opts)
-}
-
-// Infof — function that equals Infof error in the logger.
-func (l Logger) Infof(format string, opts ...any) {
-	l.SugaredLogger.Infof(format, opts)
-}
-
-// Warnf — function that equals Warnf error in the logger.
-func (l Logger) Warnf(format string, opts ...any) {
-	l.SugaredLogger.Warnf(format, opts)
-}
-
-// Panicf — function that equals Panicf error in the logger.
-func (l Logger) Panicf(format string, opts ...any) {
-	l.SugaredLogger.Panicf(format, opts)
-}
-
-// Info — function that equals Info error in the logger.
-func (l Logger) Info(msg string) {
-	l.SugaredLogger.Info(msg)
 }

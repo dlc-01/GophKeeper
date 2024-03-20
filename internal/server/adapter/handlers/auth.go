@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"context"
-	"github.com/dlc-01/GophKeeper/internal/general/proto"
+	proto "github.com/dlc-01/GophKeeper/internal/general/proto/gen"
 	"github.com/dlc-01/GophKeeper/internal/server/core/domain/models"
 	"github.com/dlc-01/GophKeeper/internal/server/core/port"
 )
@@ -21,8 +21,8 @@ func NewAuthServer(auth port.IAuthService) *AuthServer {
 func (s *AuthServer) Register(ctx context.Context, req *proto.RegisterUserRequest) (*proto.RegisterUserResponse, error) {
 	var resp proto.RegisterUserResponse
 	user := models.User{
-		Username:     req.Login,
-		PasswordHash: req.PasswordHash}
+		Username:     req.GetLogin(),
+		PasswordHash: req.GetPasswordHash()}
 	token, err := s.auth.Register(ctx, &user)
 	if err != nil {
 		return nil, err
@@ -35,8 +35,8 @@ func (s *AuthServer) Register(ctx context.Context, req *proto.RegisterUserReques
 func (s *AuthServer) Login(ctx context.Context, req *proto.LoginUserRequest) (*proto.LoginUserResponse, error) {
 	var resp proto.LoginUserResponse
 	user := models.User{
-		Username:     req.Login,
-		PasswordHash: req.PasswordHash}
+		Username:     req.GetLogin(),
+		PasswordHash: req.GetPasswordHash()}
 	token, err := s.auth.Login(ctx, &user)
 	if err != nil {
 		return nil, err

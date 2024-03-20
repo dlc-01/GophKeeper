@@ -2,13 +2,14 @@ syntax = "proto3";
 
 package proto;
 
-option go_package = "GophKeeper/internal/server/adapter/proto";
+option go_package = "GophKeeper/internal/server/adapter/proto/gen/";
 
 message PairMsg {
   uint64 id = 1;
   string login = 2;
   string password_hash = 3;
-  string metadata = 4;
+  string nonce_hex = 4;
+  string metadata = 5;
 }
 
 message CreatePairRequest {

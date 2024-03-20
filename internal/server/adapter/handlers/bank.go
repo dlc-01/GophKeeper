@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"context"
-	proto2 "github.com/dlc-01/GophKeeper/internal/general/proto"
+	proto "github.com/dlc-01/GophKeeper/internal/general/proto/gen"
 	"github.com/dlc-01/GophKeeper/internal/server/core/domain/models"
 	"github.com/dlc-01/GophKeeper/internal/server/core/port"
 	"google.golang.org/grpc/codes"
@@ -11,7 +11,7 @@ import (
 )
 
 type BankServer struct {
-	proto2.UnimplementedBanksServer
+	proto.UnimplementedBanksServer
 	bank port.IBankService
 }
 
@@ -21,8 +21,8 @@ func NewBankServer(bank port.IBankService) *BankServer {
 	}
 }
 
-func (b *BankServer) CreateBank(ctx context.Context, req *proto2.CreateBankRequest) (*proto2.CreateBankResponse, error) {
-	var resp proto2.CreateBankResponse
+func (b *BankServer) CreateBank(ctx context.Context, req *proto.CreateBankRequest) (*proto.CreateBankResponse, error) {
+	var resp proto.CreateBankResponse
 
 	userID, ok := ctx.Value(UserIDKey).(uint64)
 	if !ok {
@@ -33,16 +33,18 @@ func (b *BankServer) CreateBank(ctx context.Context, req *proto2.CreateBankReque
 		ID: &userID,
 	}
 
-	date, err := time.Parse("2006-01-02", req.Card.ExpirationDate)
+	date, err := time.Parse("2006-01-02", req.Card.GetExpirationDate())
 	if err != nil {
 		return nil, status.Error(codes.Aborted, "cannot parse ExpirationDate")
 	}
 
 	card := models.BankAccount{
-		Metadata:       req.Card.Metadata,
-		Number:         req.Card.Number,
-		CardHolder:     req.Card.CardHolder,
-		ExpirationDate: date,
+		Metadata:         req.Card.GetMetadata(),
+		Number:           req.Card.GetNumber(),
+		CardHolder:       req.Card.GetCardHolder(),
+		SecurityCodeHash: req.Card.GetSecurityCodeHash(),
+		NonceHex:         req.Card.GetNonceHex(),
+		ExpirationDate:   date,
 	}
 
 	bankNew, err := b.bank.CreateByUserId(ctx, card, user)
@@ -55,8 +57,8 @@ func (b *BankServer) CreateBank(ctx context.Context, req *proto2.CreateBankReque
 
 	return &resp, nil
 }
-func (b *BankServer) GetBank(ctx context.Context, req *proto2.GetBankRequest) (*proto2.GetBankResponse, error) {
-	var resp proto2.GetBankResponse
+func (b *BankServer) GetBank(ctx context.Context, req *proto.GetBankRequest) (*proto.GetBankResponse, error) {
+	var resp proto.GetBankResponse
 
 	userID, ok := ctx.Value(UserIDKey).(uint64)
 	if !ok {
@@ -73,34 +75,39 @@ func (b *BankServer) GetBank(ctx context.Context, req *proto2.GetBankRequest) (*
 	}
 
 	for _, bank := range *stored {
-		resp.Cards = append(resp.Cards, &proto2.CardMsg{
-			Id:             bank.ID,
-			Number:         bank.Number,
-			CardHolder:     bank.CardHolder,
-			ExpirationDate: bank.ExpirationDate.String(),
-			Metadata:       bank.Metadata,
+
+		resp.Cards = append(resp.Cards, &proto.CardMsg{
+			Id:               bank.ID,
+			Number:           bank.Number,
+			CardHolder:       bank.CardHolder,
+			ExpirationDate:   bank.ExpirationDate.String(),
+			Metadata:         bank.Metadata,
+			SecurityCodeHash: bank.SecurityCodeHash,
+			NonceHex:         bank.NonceHex,
 		})
 	}
 	return &resp, nil
 }
-func (b *BankServer) UpdateBank(ctx context.Context, req *proto2.UpdateBankRequest) (*proto2.UpdateBankResponse, error) {
-	var resp proto2.UpdateBankResponse
+func (b *BankServer) UpdateBank(ctx context.Context, req *proto.UpdateBankRequest) (*proto.UpdateBankResponse, error) {
+	var resp proto.UpdateBankResponse
 
 	_, ok := ctx.Value(UserIDKey).(uint64)
 	if !ok {
 		return nil, status.Error(codes.Aborted, "missing user_id")
 	}
 
-	date, err := time.Parse("2006-01-02", req.Card.ExpirationDate)
+	date, err := time.Parse("2006-01-02", req.Card.GetExpirationDate())
 	if err != nil {
 		return nil, status.Error(codes.Aborted, "cannot parse ExpirationDate")
 	}
 
 	card := models.BankAccount{
-		Metadata:       req.Card.Metadata,
-		Number:         req.Card.Number,
-		CardHolder:     req.Card.CardHolder,
-		ExpirationDate: date,
+		Metadata:         req.Card.GetMetadata(),
+		Number:           req.Card.GetNumber(),
+		CardHolder:       req.Card.GetCardHolder(),
+		ExpirationDate:   date,
+		SecurityCodeHash: req.Card.GetSecurityCodeHash(),
+		NonceHex:         req.Card.GetNonceHex(),
 	}
 
 	_, err = b.bank.Update(ctx, card)
@@ -112,8 +119,8 @@ func (b *BankServer) UpdateBank(ctx context.Context, req *proto2.UpdateBankReque
 
 	return &resp, nil
 }
-func (b *BankServer) DeleteBank(ctx context.Context, req *proto2.DeleteBankRequest) (*proto2.DeleteBankResponse, error) {
-	var resp proto2.DeleteBankResponse
+func (b *BankServer) DeleteBank(ctx context.Context, req *proto.DeleteBankRequest) (*proto.DeleteBankResponse, error) {
+	var resp proto.DeleteBankResponse
 
 	userID, ok := ctx.Value(UserIDKey).(uint64)
 	if !ok {

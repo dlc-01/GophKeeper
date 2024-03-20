@@ -18,13 +18,13 @@ type App struct {
 	view     *gui.View
 }
 
-func New(cfg *config.Config) (a *App) {
-	loger, err := logger.Initialize(logger.ConfigLog{AppMode: logger.DevelopMode})
+func New(cfg *config.Config) *App {
+	loger, err := logger.Initialize(cfg.Logger)
 	if err != nil {
 		log.Fatal("error while starting client %w", err)
 	}
 
-	a = &App{
+	a := &App{
 		config: cfg,
 		logger: loger,
 	}
@@ -38,11 +38,10 @@ func New(cfg *config.Config) (a *App) {
 	a.handlers = handlers.New(a.conn)
 	a.view = gui.New(a.handlers, cfg)
 
-	return
+	return a
 }
 
 func (a *App) Run() {
 	defer a.conn.Close()
-
 	a.view.Run()
 }

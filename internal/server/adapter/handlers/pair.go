@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"context"
-	proto2 "github.com/dlc-01/GophKeeper/internal/general/proto"
+	proto "github.com/dlc-01/GophKeeper/internal/general/proto/gen"
 	"github.com/dlc-01/GophKeeper/internal/server/core/domain/models"
 	"github.com/dlc-01/GophKeeper/internal/server/core/port"
 	"google.golang.org/grpc/codes"
@@ -10,7 +10,7 @@ import (
 )
 
 type PairServer struct {
-	proto2.UnimplementedPairServer
+	proto.UnimplementedPairServer
 	pair port.IPairService
 }
 
@@ -20,8 +20,8 @@ func NewPairServer(pair port.IPairService) *PairServer {
 	}
 }
 
-func (p *PairServer) CreatePair(ctx context.Context, req *proto2.CreatePairRequest) (*proto2.CreatePairResponse, error) {
-	var resp proto2.CreatePairResponse
+func (p *PairServer) CreatePair(ctx context.Context, req *proto.CreatePairRequest) (*proto.CreatePairResponse, error) {
+	var resp proto.CreatePairResponse
 
 	userID, ok := ctx.Value(UserIDKey).(uint64)
 	if !ok {
@@ -33,9 +33,10 @@ func (p *PairServer) CreatePair(ctx context.Context, req *proto2.CreatePairReque
 	}
 
 	pair := models.Pair{
-		Metadata:     req.Pair.Metadata,
-		Username:     req.Pair.Login,
-		PasswordHash: req.Pair.PasswordHash,
+		Metadata:     req.Pair.GetMetadata(),
+		Username:     req.Pair.GetLogin(),
+		PasswordHash: req.Pair.GetPasswordHash(),
+		NonceHex:     req.Pair.GetNonceHex(),
 	}
 
 	pairNew, err := p.pair.CreateByUserId(ctx, pair, user)
@@ -49,8 +50,8 @@ func (p *PairServer) CreatePair(ctx context.Context, req *proto2.CreatePairReque
 	return &resp, nil
 }
 
-func (p *PairServer) GetPair(ctx context.Context, req *proto2.GetPairRequest) (*proto2.GetPairResponse, error) {
-	var resp proto2.GetPairResponse
+func (p *PairServer) GetPair(ctx context.Context, req *proto.GetPairRequest) (*proto.GetPairResponse, error) {
+	var resp proto.GetPairResponse
 
 	userID, ok := ctx.Value(UserIDKey).(uint64)
 	if !ok {
@@ -67,19 +68,20 @@ func (p *PairServer) GetPair(ctx context.Context, req *proto2.GetPairRequest) (*
 	}
 
 	for _, pair := range *stored {
-		resp.Pairs = append(resp.Pairs, &proto2.PairMsg{
+		resp.Pairs = append(resp.Pairs, &proto.PairMsg{
 			Id:           pair.ID,
 			Login:        pair.Username,
 			PasswordHash: pair.PasswordHash,
 			Metadata:     pair.Metadata,
+			NonceHex:     pair.NonceHex,
 		})
 	}
 
 	return &resp, nil
 }
 
-func (p *PairServer) UpdatePair(ctx context.Context, req *proto2.UpdatePairRequest) (*proto2.UpdatePairResponse, error) {
-	var resp proto2.UpdatePairResponse
+func (p *PairServer) UpdatePair(ctx context.Context, req *proto.UpdatePairRequest) (*proto.UpdatePairResponse, error) {
+	var resp proto.UpdatePairResponse
 
 	_, ok := ctx.Value(UserIDKey).(uint64)
 	if !ok {
@@ -87,10 +89,11 @@ func (p *PairServer) UpdatePair(ctx context.Context, req *proto2.UpdatePairReque
 	}
 
 	pair := models.Pair{
-		ID:           req.Pair.Id,
-		Username:     req.Pair.Login,
-		PasswordHash: req.Pair.PasswordHash,
-		Metadata:     req.Pair.Metadata,
+		ID:           req.Pair.GetId(),
+		Username:     req.Pair.GetLogin(),
+		PasswordHash: req.Pair.GetPasswordHash(),
+		Metadata:     req.Pair.GetMetadata(),
+		NonceHex:     req.Pair.GetNonceHex(),
 	}
 
 	_, err := p.pair.Update(ctx, pair)
@@ -103,8 +106,8 @@ func (p *PairServer) UpdatePair(ctx context.Context, req *proto2.UpdatePairReque
 	return &resp, nil
 }
 
-func (p *PairServer) DeletePair(ctx context.Context, req *proto2.DeletePairRequest) (*proto2.DeletePairResponse, error) {
-	var resp proto2.DeletePairResponse
+func (p *PairServer) DeletePair(ctx context.Context, req *proto.DeletePairRequest) (*proto.DeletePairResponse, error) {
+	var resp proto.DeletePairResponse
 
 	userID, ok := ctx.Value(UserIDKey).(uint64)
 	if !ok {

@@ -2,9 +2,9 @@
 // versions:
 // 	protoc-gen-go v1.33.0
 // 	protoc        v4.25.3
-// source: proto/bank.proto
+// source: bank.proto
 
-package proto
+package gen
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -25,18 +25,19 @@ type CardMsg struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id             uint64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	CardHolder     string `protobuf:"bytes,2,opt,name=card_holder,json=cardHolder,proto3" json:"card_holder,omitempty"`
-	Number         uint64 `protobuf:"varint,3,opt,name=number,proto3" json:"number,omitempty"`
-	ExpirationDate string `protobuf:"bytes,4,opt,name=expiration_date,json=expirationDate,proto3" json:"expiration_date,omitempty"`
-	Metadata       string `protobuf:"bytes,5,opt,name=metadata,proto3" json:"metadata,omitempty"`
-	SecurityCode   string `protobuf:"bytes,6,opt,name=security_code,json=securityCode,proto3" json:"security_code,omitempty"`
+	Id               uint64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	CardHolder       string `protobuf:"bytes,2,opt,name=card_holder,json=cardHolder,proto3" json:"card_holder,omitempty"`
+	Number           uint64 `protobuf:"varint,3,opt,name=number,proto3" json:"number,omitempty"`
+	ExpirationDate   string `protobuf:"bytes,4,opt,name=expiration_date,json=expirationDate,proto3" json:"expiration_date,omitempty"`
+	Metadata         string `protobuf:"bytes,5,opt,name=metadata,proto3" json:"metadata,omitempty"`
+	SecurityCodeHash string `protobuf:"bytes,6,opt,name=security_code_hash,json=securityCodeHash,proto3" json:"security_code_hash,omitempty"`
+	NonceHex         string `protobuf:"bytes,7,opt,name=nonce_hex,json=nonceHex,proto3" json:"nonce_hex,omitempty"`
 }
 
 func (x *CardMsg) Reset() {
 	*x = CardMsg{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_proto_bank_proto_msgTypes[0]
+		mi := &file_bank_proto_msgTypes[0]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -49,7 +50,7 @@ func (x *CardMsg) String() string {
 func (*CardMsg) ProtoMessage() {}
 
 func (x *CardMsg) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_bank_proto_msgTypes[0]
+	mi := &file_bank_proto_msgTypes[0]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -62,7 +63,7 @@ func (x *CardMsg) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CardMsg.ProtoReflect.Descriptor instead.
 func (*CardMsg) Descriptor() ([]byte, []int) {
-	return file_proto_bank_proto_rawDescGZIP(), []int{0}
+	return file_bank_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *CardMsg) GetId() uint64 {
@@ -100,9 +101,16 @@ func (x *CardMsg) GetMetadata() string {
 	return ""
 }
 
-func (x *CardMsg) GetSecurityCode() string {
+func (x *CardMsg) GetSecurityCodeHash() string {
 	if x != nil {
-		return x.SecurityCode
+		return x.SecurityCodeHash
+	}
+	return ""
+}
+
+func (x *CardMsg) GetNonceHex() string {
+	if x != nil {
+		return x.NonceHex
 	}
 	return ""
 }
@@ -119,7 +127,7 @@ type CreateBankRequest struct {
 func (x *CreateBankRequest) Reset() {
 	*x = CreateBankRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_proto_bank_proto_msgTypes[1]
+		mi := &file_bank_proto_msgTypes[1]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -132,7 +140,7 @@ func (x *CreateBankRequest) String() string {
 func (*CreateBankRequest) ProtoMessage() {}
 
 func (x *CreateBankRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_bank_proto_msgTypes[1]
+	mi := &file_bank_proto_msgTypes[1]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -145,7 +153,7 @@ func (x *CreateBankRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateBankRequest.ProtoReflect.Descriptor instead.
 func (*CreateBankRequest) Descriptor() ([]byte, []int) {
-	return file_proto_bank_proto_rawDescGZIP(), []int{1}
+	return file_bank_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *CreateBankRequest) GetToken() string {
@@ -174,7 +182,7 @@ type CreateBankResponse struct {
 func (x *CreateBankResponse) Reset() {
 	*x = CreateBankResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_proto_bank_proto_msgTypes[2]
+		mi := &file_bank_proto_msgTypes[2]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -187,7 +195,7 @@ func (x *CreateBankResponse) String() string {
 func (*CreateBankResponse) ProtoMessage() {}
 
 func (x *CreateBankResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_bank_proto_msgTypes[2]
+	mi := &file_bank_proto_msgTypes[2]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -200,7 +208,7 @@ func (x *CreateBankResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateBankResponse.ProtoReflect.Descriptor instead.
 func (*CreateBankResponse) Descriptor() ([]byte, []int) {
-	return file_proto_bank_proto_rawDescGZIP(), []int{2}
+	return file_bank_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *CreateBankResponse) GetCard() *CardMsg {
@@ -228,7 +236,7 @@ type GetBankRequest struct {
 func (x *GetBankRequest) Reset() {
 	*x = GetBankRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_proto_bank_proto_msgTypes[3]
+		mi := &file_bank_proto_msgTypes[3]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -241,7 +249,7 @@ func (x *GetBankRequest) String() string {
 func (*GetBankRequest) ProtoMessage() {}
 
 func (x *GetBankRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_bank_proto_msgTypes[3]
+	mi := &file_bank_proto_msgTypes[3]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -254,7 +262,7 @@ func (x *GetBankRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetBankRequest.ProtoReflect.Descriptor instead.
 func (*GetBankRequest) Descriptor() ([]byte, []int) {
-	return file_proto_bank_proto_rawDescGZIP(), []int{3}
+	return file_bank_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *GetBankRequest) GetToken() string {
@@ -276,7 +284,7 @@ type GetBankResponse struct {
 func (x *GetBankResponse) Reset() {
 	*x = GetBankResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_proto_bank_proto_msgTypes[4]
+		mi := &file_bank_proto_msgTypes[4]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -289,7 +297,7 @@ func (x *GetBankResponse) String() string {
 func (*GetBankResponse) ProtoMessage() {}
 
 func (x *GetBankResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_bank_proto_msgTypes[4]
+	mi := &file_bank_proto_msgTypes[4]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -302,7 +310,7 @@ func (x *GetBankResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetBankResponse.ProtoReflect.Descriptor instead.
 func (*GetBankResponse) Descriptor() ([]byte, []int) {
-	return file_proto_bank_proto_rawDescGZIP(), []int{4}
+	return file_bank_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *GetBankResponse) GetCards() []*CardMsg {
@@ -330,7 +338,7 @@ type UpdateBankRequest struct {
 func (x *UpdateBankRequest) Reset() {
 	*x = UpdateBankRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_proto_bank_proto_msgTypes[5]
+		mi := &file_bank_proto_msgTypes[5]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -343,7 +351,7 @@ func (x *UpdateBankRequest) String() string {
 func (*UpdateBankRequest) ProtoMessage() {}
 
 func (x *UpdateBankRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_bank_proto_msgTypes[5]
+	mi := &file_bank_proto_msgTypes[5]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -356,7 +364,7 @@ func (x *UpdateBankRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateBankRequest.ProtoReflect.Descriptor instead.
 func (*UpdateBankRequest) Descriptor() ([]byte, []int) {
-	return file_proto_bank_proto_rawDescGZIP(), []int{5}
+	return file_bank_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *UpdateBankRequest) GetCard() *CardMsg {
@@ -378,7 +386,7 @@ type UpdateBankResponse struct {
 func (x *UpdateBankResponse) Reset() {
 	*x = UpdateBankResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_proto_bank_proto_msgTypes[6]
+		mi := &file_bank_proto_msgTypes[6]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -391,7 +399,7 @@ func (x *UpdateBankResponse) String() string {
 func (*UpdateBankResponse) ProtoMessage() {}
 
 func (x *UpdateBankResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_bank_proto_msgTypes[6]
+	mi := &file_bank_proto_msgTypes[6]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -404,7 +412,7 @@ func (x *UpdateBankResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateBankResponse.ProtoReflect.Descriptor instead.
 func (*UpdateBankResponse) Descriptor() ([]byte, []int) {
-	return file_proto_bank_proto_rawDescGZIP(), []int{6}
+	return file_bank_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *UpdateBankResponse) GetCard() *CardMsg {
@@ -432,7 +440,7 @@ type DeleteBankRequest struct {
 func (x *DeleteBankRequest) Reset() {
 	*x = DeleteBankRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_proto_bank_proto_msgTypes[7]
+		mi := &file_bank_proto_msgTypes[7]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -445,7 +453,7 @@ func (x *DeleteBankRequest) String() string {
 func (*DeleteBankRequest) ProtoMessage() {}
 
 func (x *DeleteBankRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_bank_proto_msgTypes[7]
+	mi := &file_bank_proto_msgTypes[7]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -458,7 +466,7 @@ func (x *DeleteBankRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteBankRequest.ProtoReflect.Descriptor instead.
 func (*DeleteBankRequest) Descriptor() ([]byte, []int) {
-	return file_proto_bank_proto_rawDescGZIP(), []int{7}
+	return file_bank_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *DeleteBankRequest) GetToken() string {
@@ -479,7 +487,7 @@ type DeleteBankResponse struct {
 func (x *DeleteBankResponse) Reset() {
 	*x = DeleteBankResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_proto_bank_proto_msgTypes[8]
+		mi := &file_bank_proto_msgTypes[8]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -492,7 +500,7 @@ func (x *DeleteBankResponse) String() string {
 func (*DeleteBankResponse) ProtoMessage() {}
 
 func (x *DeleteBankResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_bank_proto_msgTypes[8]
+	mi := &file_bank_proto_msgTypes[8]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -505,7 +513,7 @@ func (x *DeleteBankResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteBankResponse.ProtoReflect.Descriptor instead.
 func (*DeleteBankResponse) Descriptor() ([]byte, []int) {
-	return file_proto_bank_proto_rawDescGZIP(), []int{8}
+	return file_bank_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *DeleteBankResponse) GetError() string {
@@ -515,23 +523,25 @@ func (x *DeleteBankResponse) GetError() string {
 	return ""
 }
 
-var File_proto_bank_proto protoreflect.FileDescriptor
+var File_bank_proto protoreflect.FileDescriptor
 
-var file_proto_bank_proto_rawDesc = []byte{
-	0x0a, 0x10, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2f, 0x62, 0x61, 0x6e, 0x6b, 0x2e, 0x70, 0x72, 0x6f,
-	0x74, 0x6f, 0x12, 0x05, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x22, 0xbc, 0x01, 0x0a, 0x07, 0x43, 0x61,
-	0x72, 0x64, 0x4d, 0x73, 0x67, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28,
-	0x04, 0x52, 0x02, 0x69, 0x64, 0x12, 0x1f, 0x0a, 0x0b, 0x63, 0x61, 0x72, 0x64, 0x5f, 0x68, 0x6f,
-	0x6c, 0x64, 0x65, 0x72, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0a, 0x63, 0x61, 0x72, 0x64,
-	0x48, 0x6f, 0x6c, 0x64, 0x65, 0x72, 0x12, 0x16, 0x0a, 0x06, 0x6e, 0x75, 0x6d, 0x62, 0x65, 0x72,
-	0x18, 0x03, 0x20, 0x01, 0x28, 0x04, 0x52, 0x06, 0x6e, 0x75, 0x6d, 0x62, 0x65, 0x72, 0x12, 0x27,
-	0x0a, 0x0f, 0x65, 0x78, 0x70, 0x69, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x5f, 0x64, 0x61, 0x74,
-	0x65, 0x18, 0x04, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0e, 0x65, 0x78, 0x70, 0x69, 0x72, 0x61, 0x74,
-	0x69, 0x6f, 0x6e, 0x44, 0x61, 0x74, 0x65, 0x12, 0x1a, 0x0a, 0x08, 0x6d, 0x65, 0x74, 0x61, 0x64,
-	0x61, 0x74, 0x61, 0x18, 0x05, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x6d, 0x65, 0x74, 0x61, 0x64,
-	0x61, 0x74, 0x61, 0x12, 0x23, 0x0a, 0x0d, 0x73, 0x65, 0x63, 0x75, 0x72, 0x69, 0x74, 0x79, 0x5f,
-	0x63, 0x6f, 0x64, 0x65, 0x18, 0x06, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0c, 0x73, 0x65, 0x63, 0x75,
-	0x72, 0x69, 0x74, 0x79, 0x43, 0x6f, 0x64, 0x65, 0x22, 0x4d, 0x0a, 0x11, 0x43, 0x72, 0x65, 0x61,
+var file_bank_proto_rawDesc = []byte{
+	0x0a, 0x0a, 0x62, 0x61, 0x6e, 0x6b, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x12, 0x05, 0x70, 0x72,
+	0x6f, 0x74, 0x6f, 0x22, 0xe2, 0x01, 0x0a, 0x07, 0x43, 0x61, 0x72, 0x64, 0x4d, 0x73, 0x67, 0x12,
+	0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x04, 0x52, 0x02, 0x69, 0x64, 0x12,
+	0x1f, 0x0a, 0x0b, 0x63, 0x61, 0x72, 0x64, 0x5f, 0x68, 0x6f, 0x6c, 0x64, 0x65, 0x72, 0x18, 0x02,
+	0x20, 0x01, 0x28, 0x09, 0x52, 0x0a, 0x63, 0x61, 0x72, 0x64, 0x48, 0x6f, 0x6c, 0x64, 0x65, 0x72,
+	0x12, 0x16, 0x0a, 0x06, 0x6e, 0x75, 0x6d, 0x62, 0x65, 0x72, 0x18, 0x03, 0x20, 0x01, 0x28, 0x04,
+	0x52, 0x06, 0x6e, 0x75, 0x6d, 0x62, 0x65, 0x72, 0x12, 0x27, 0x0a, 0x0f, 0x65, 0x78, 0x70, 0x69,
+	0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x5f, 0x64, 0x61, 0x74, 0x65, 0x18, 0x04, 0x20, 0x01, 0x28,
+	0x09, 0x52, 0x0e, 0x65, 0x78, 0x70, 0x69, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x44, 0x61, 0x74,
+	0x65, 0x12, 0x1a, 0x0a, 0x08, 0x6d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0x18, 0x05, 0x20,
+	0x01, 0x28, 0x09, 0x52, 0x08, 0x6d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0x12, 0x2c, 0x0a,
+	0x12, 0x73, 0x65, 0x63, 0x75, 0x72, 0x69, 0x74, 0x79, 0x5f, 0x63, 0x6f, 0x64, 0x65, 0x5f, 0x68,
+	0x61, 0x73, 0x68, 0x18, 0x06, 0x20, 0x01, 0x28, 0x09, 0x52, 0x10, 0x73, 0x65, 0x63, 0x75, 0x72,
+	0x69, 0x74, 0x79, 0x43, 0x6f, 0x64, 0x65, 0x48, 0x61, 0x73, 0x68, 0x12, 0x1b, 0x0a, 0x09, 0x6e,
+	0x6f, 0x6e, 0x63, 0x65, 0x5f, 0x68, 0x65, 0x78, 0x18, 0x07, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08,
+	0x6e, 0x6f, 0x6e, 0x63, 0x65, 0x48, 0x65, 0x78, 0x22, 0x4d, 0x0a, 0x11, 0x43, 0x72, 0x65, 0x61,
 	0x74, 0x65, 0x42, 0x61, 0x6e, 0x6b, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x14, 0x0a,
 	0x05, 0x74, 0x6f, 0x6b, 0x65, 0x6e, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x74, 0x6f,
 	0x6b, 0x65, 0x6e, 0x12, 0x22, 0x0a, 0x04, 0x63, 0x61, 0x72, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28,
@@ -579,26 +589,27 @@ var file_proto_bank_proto_rawDesc = []byte{
 	0x74, 0x65, 0x42, 0x61, 0x6e, 0x6b, 0x12, 0x18, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x44,
 	0x65, 0x6c, 0x65, 0x74, 0x65, 0x42, 0x61, 0x6e, 0x6b, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
 	0x1a, 0x19, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x42,
-	0x61, 0x6e, 0x6b, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x42, 0x2a, 0x5a, 0x28, 0x47,
+	0x61, 0x6e, 0x6b, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x42, 0x2f, 0x5a, 0x2d, 0x47,
 	0x6f, 0x70, 0x68, 0x4b, 0x65, 0x65, 0x70, 0x65, 0x72, 0x2f, 0x69, 0x6e, 0x74, 0x65, 0x72, 0x6e,
 	0x61, 0x6c, 0x2f, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2f, 0x61, 0x64, 0x61, 0x70, 0x74, 0x65,
-	0x72, 0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x72, 0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2f, 0x67, 0x65, 0x6e, 0x2f, 0x62, 0x06, 0x70, 0x72,
+	0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
-	file_proto_bank_proto_rawDescOnce sync.Once
-	file_proto_bank_proto_rawDescData = file_proto_bank_proto_rawDesc
+	file_bank_proto_rawDescOnce sync.Once
+	file_bank_proto_rawDescData = file_bank_proto_rawDesc
 )
 
-func file_proto_bank_proto_rawDescGZIP() []byte {
-	file_proto_bank_proto_rawDescOnce.Do(func() {
-		file_proto_bank_proto_rawDescData = protoimpl.X.CompressGZIP(file_proto_bank_proto_rawDescData)
+func file_bank_proto_rawDescGZIP() []byte {
+	file_bank_proto_rawDescOnce.Do(func() {
+		file_bank_proto_rawDescData = protoimpl.X.CompressGZIP(file_bank_proto_rawDescData)
 	})
-	return file_proto_bank_proto_rawDescData
+	return file_bank_proto_rawDescData
 }
 
-var file_proto_bank_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
-var file_proto_bank_proto_goTypes = []interface{}{
+var file_bank_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
+var file_bank_proto_goTypes = []interface{}{
 	(*CardMsg)(nil),            // 0: proto.CardMsg
 	(*CreateBankRequest)(nil),  // 1: proto.CreateBankRequest
 	(*CreateBankResponse)(nil), // 2: proto.CreateBankResponse
@@ -609,7 +620,7 @@ var file_proto_bank_proto_goTypes = []interface{}{
 	(*DeleteBankRequest)(nil),  // 7: proto.DeleteBankRequest
 	(*DeleteBankResponse)(nil), // 8: proto.DeleteBankResponse
 }
-var file_proto_bank_proto_depIdxs = []int32{
+var file_bank_proto_depIdxs = []int32{
 	0, // 0: proto.CreateBankRequest.card:type_name -> proto.CardMsg
 	0, // 1: proto.CreateBankResponse.card:type_name -> proto.CardMsg
 	0, // 2: proto.GetBankResponse.cards:type_name -> proto.CardMsg
@@ -630,13 +641,13 @@ var file_proto_bank_proto_depIdxs = []int32{
 	0, // [0:5] is the sub-list for field type_name
 }
 
-func init() { file_proto_bank_proto_init() }
-func file_proto_bank_proto_init() {
-	if File_proto_bank_proto != nil {
+func init() { file_bank_proto_init() }
+func file_bank_proto_init() {
+	if File_bank_proto != nil {
 		return
 	}
 	if !protoimpl.UnsafeEnabled {
-		file_proto_bank_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
+		file_bank_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*CardMsg); i {
 			case 0:
 				return &v.state
@@ -648,7 +659,7 @@ func file_proto_bank_proto_init() {
 				return nil
 			}
 		}
-		file_proto_bank_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
+		file_bank_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*CreateBankRequest); i {
 			case 0:
 				return &v.state
@@ -660,7 +671,7 @@ func file_proto_bank_proto_init() {
 				return nil
 			}
 		}
-		file_proto_bank_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
+		file_bank_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*CreateBankResponse); i {
 			case 0:
 				return &v.state
@@ -672,7 +683,7 @@ func file_proto_bank_proto_init() {
 				return nil
 			}
 		}
-		file_proto_bank_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
+		file_bank_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*GetBankRequest); i {
 			case 0:
 				return &v.state
@@ -684,7 +695,7 @@ func file_proto_bank_proto_init() {
 				return nil
 			}
 		}
-		file_proto_bank_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
+		file_bank_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*GetBankResponse); i {
 			case 0:
 				return &v.state
@@ -696,7 +707,7 @@ func file_proto_bank_proto_init() {
 				return nil
 			}
 		}
-		file_proto_bank_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
+		file_bank_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*UpdateBankRequest); i {
 			case 0:
 				return &v.state
@@ -708,7 +719,7 @@ func file_proto_bank_proto_init() {
 				return nil
 			}
 		}
-		file_proto_bank_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
+		file_bank_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*UpdateBankResponse); i {
 			case 0:
 				return &v.state
@@ -720,7 +731,7 @@ func file_proto_bank_proto_init() {
 				return nil
 			}
 		}
-		file_proto_bank_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
+		file_bank_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*DeleteBankRequest); i {
 			case 0:
 				return &v.state
@@ -732,7 +743,7 @@ func file_proto_bank_proto_init() {
 				return nil
 			}
 		}
-		file_proto_bank_proto_msgTypes[8].Exporter = func(v interface{}, i int) interface{} {
+		file_bank_proto_msgTypes[8].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*DeleteBankResponse); i {
 			case 0:
 				return &v.state
@@ -749,18 +760,18 @@ func file_proto_bank_proto_init() {
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: file_proto_bank_proto_rawDesc,
+			RawDescriptor: file_bank_proto_rawDesc,
 			NumEnums:      0,
 			NumMessages:   9,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
-		GoTypes:           file_proto_bank_proto_goTypes,
-		DependencyIndexes: file_proto_bank_proto_depIdxs,
-		MessageInfos:      file_proto_bank_proto_msgTypes,
+		GoTypes:           file_bank_proto_goTypes,
+		DependencyIndexes: file_bank_proto_depIdxs,
+		MessageInfos:      file_bank_proto_msgTypes,
 	}.Build()
-	File_proto_bank_proto = out.File
-	file_proto_bank_proto_rawDesc = nil
-	file_proto_bank_proto_goTypes = nil
-	file_proto_bank_proto_depIdxs = nil
+	File_bank_proto = out.File
+	file_bank_proto_rawDesc = nil
+	file_bank_proto_goTypes = nil
+	file_bank_proto_depIdxs = nil
 }

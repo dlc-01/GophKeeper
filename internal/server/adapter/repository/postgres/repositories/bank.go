@@ -26,12 +26,19 @@ func NewBankRepository(lgr *logger.Logger, client *sql.DB) (*BankRepository, err
 
 func (b *BankRepository) CreateByUserId(ctx context.Context, bank *models.BankAccount, user *models.User) (*models.BankAccount, error) {
 	var stored models.BankAccount
-	err := b.QueryRowContext(ctx, query.CreateBankAcc, user.ID, bank.Number, bank.CardHolder, bank.ExpirationDate, bank.SecurityCode, bank.Metadata).
+
+	tx, err := b.Begin()
+	if err != nil {
+		return nil, fmt.Errorf("error while creating transacsion: %s", err)
+	}
+
+	err = tx.QueryRowContext(ctx, query.CreateBankAcc, user.ID, bank.Number, bank.CardHolder, bank.ExpirationDate, bank.SecurityCodeHash, bank.NonceHex, bank.Metadata).
 		Scan(&stored.ID,
 			&stored.Number,
 			&stored.CardHolder,
 			&stored.ExpirationDate,
-			&stored.SecurityCode,
+			&stored.SecurityCodeHash,
+			&stored.NonceHex,
 			&stored.Metadata)
 	if err != nil {
 		if errCode := pq.ErrorCode(err.Error()); errCode == "23505" {
@@ -40,23 +47,39 @@ func (b *BankRepository) CreateByUserId(ctx context.Context, bank *models.BankAc
 		return nil, fmt.Errorf("error while creating bankAcc: %w", err)
 	}
 
+	err = tx.Commit()
+	if err != nil {
+		return nil, fmt.Errorf("error while commiting transacsion: %s", err)
+	}
 	return &stored, nil
 }
 
 func (b *BankRepository) CreateByUsername(ctx context.Context, bank *models.BankAccount, user *models.User) (*models.BankAccount, error) {
 	var stored models.BankAccount
-	err := b.QueryRowContext(ctx, query.CreateBankAccByUsername, user.Username, bank.Number, bank.CardHolder, bank.ExpirationDate, bank.SecurityCode, bank.Metadata).
+
+	tx, err := b.Begin()
+	if err != nil {
+		return nil, fmt.Errorf("error while creating transacsion: %s", err)
+	}
+
+	err = tx.QueryRowContext(ctx, query.CreateBankAccByUsername, user.Username, bank.Number, bank.CardHolder, bank.ExpirationDate, bank.SecurityCodeHash, bank.NonceHex, bank.Metadata).
 		Scan(&stored.ID,
 			&stored.Number,
 			&stored.CardHolder,
 			&stored.ExpirationDate,
-			&stored.SecurityCode,
+			&stored.SecurityCodeHash,
+			&stored.NonceHex,
 			&stored.Metadata)
 	if err != nil {
 		if errCode := pq.ErrorCode(err.Error()); errCode == "23505" {
 			return nil, projectError.ErrConflictingData
 		}
 		return nil, fmt.Errorf("error while creating bankAcc: %w", err)
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		return nil, fmt.Errorf("error while commiting transacsion: %s", err)
 	}
 
 	return &stored, nil
@@ -64,22 +87,34 @@ func (b *BankRepository) CreateByUsername(ctx context.Context, bank *models.Bank
 
 func (b *BankRepository) GetBankAccountsByUsername(ctx context.Context, user *models.User) (*[]models.BankAccount, error) {
 	stored := make([]models.BankAccount, 0)
-	row, err := b.DB.QueryContext(ctx, query.GetBankAccountsByUsername, user.Username)
+
+	tx, err := b.Begin()
+	if err != nil {
+		return nil, fmt.Errorf("error while creating transacsion: %s", err)
+	}
+
+	row, err := tx.QueryContext(ctx, query.GetBankAccountsByUsername, user.Username)
 	if err != nil {
 		if err == pgx.ErrNoRows {
 			return nil, projectError.ErrDataNotFound
 		}
 		return nil, fmt.Errorf("error while geting bankAcc: %w", err)
 	}
+
 	for row.Next() {
 		acc := models.BankAccount{}
-		if err = row.Scan(&acc.ID, &acc.Number, &acc.CardHolder, &acc.ExpirationDate, &acc.SecurityCode, &acc.Metadata); err != nil {
+		if err = row.Scan(&acc.ID, &acc.Number, &acc.CardHolder, &acc.ExpirationDate, &acc.SecurityCodeHash, &acc.NonceHex, &acc.Metadata); err != nil {
 			if err == pgx.ErrNoRows {
 				return nil, projectError.ErrDataNotFound
 			}
 			return nil, fmt.Errorf("error while scaning bankAcc: %w", err)
 		}
 		stored = append(stored, acc)
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		return nil, fmt.Errorf("error while commiting transacsion: %s", err)
 	}
 
 	return &stored, nil
@@ -87,12 +122,19 @@ func (b *BankRepository) GetBankAccountsByUsername(ctx context.Context, user *mo
 
 func (b *BankRepository) GetBankAccountByID(ctx context.Context, bank *models.BankAccount) (*models.BankAccount, error) {
 	var stored models.BankAccount
-	err := b.QueryRowContext(ctx, query.GetBankAccountByID, bank.ID).
+
+	tx, err := b.Begin()
+	if err != nil {
+		return nil, fmt.Errorf("error while creating transacsion: %s", err)
+	}
+
+	err = tx.QueryRowContext(ctx, query.GetBankAccountByID, bank.ID).
 		Scan(&stored.ID,
 			&stored.Number,
 			&stored.CardHolder,
 			&stored.ExpirationDate,
-			&stored.SecurityCode,
+			&stored.SecurityCodeHash,
+			&stored.NonceHex,
 			&stored.Metadata)
 	if err != nil {
 		if errCode := pq.ErrorCode(err.Error()); errCode == "23505" {
@@ -100,21 +142,34 @@ func (b *BankRepository) GetBankAccountByID(ctx context.Context, bank *models.Ba
 		}
 		return nil, fmt.Errorf("error while geting bankAcc: %w", err)
 	}
+
+	err = tx.Commit()
+	if err != nil {
+		return nil, fmt.Errorf("error while commiting transacsion: %s", err)
+	}
+
 	return &stored, nil
 }
 
 func (b *BankRepository) GetBankAccountsByUserID(ctx context.Context, user *models.User) (*[]models.BankAccount, error) {
 	stored := make([]models.BankAccount, 0)
-	row, err := b.DB.QueryContext(ctx, query.GetBankAccountsByUserID, *user.ID)
+
+	tx, err := b.Begin()
+	if err != nil {
+		return nil, fmt.Errorf("error while creating transacsion: %s", err)
+	}
+
+	row, err := tx.QueryContext(ctx, query.GetBankAccountsByUserID, *user.ID)
 	if err != nil {
 		if err == pgx.ErrNoRows {
 			return nil, projectError.ErrDataNotFound
 		}
 		return nil, fmt.Errorf("error while geting bankAcc: %w", err)
 	}
+
 	for row.Next() {
 		acc := models.BankAccount{}
-		if err = row.Scan(&acc.ID, &acc.Number, &acc.CardHolder, &acc.ExpirationDate, &acc.SecurityCode, &acc.Metadata); err != nil {
+		if err = row.Scan(&acc.ID, &acc.Number, &acc.CardHolder, &acc.ExpirationDate, &acc.SecurityCodeHash, &acc.NonceHex, &acc.Metadata); err != nil {
 			if err == pgx.ErrNoRows {
 				return nil, projectError.ErrDataNotFound
 			}
@@ -123,40 +178,85 @@ func (b *BankRepository) GetBankAccountsByUserID(ctx context.Context, user *mode
 		stored = append(stored, acc)
 	}
 
+	err = tx.Commit()
+	if err != nil {
+		return nil, fmt.Errorf("error while commiting transacsion: %s", err)
+	}
+
 	return &stored, nil
 }
 
 func (b *BankRepository) Update(ctx context.Context, bank *models.BankAccount) (*models.BankAccount, error) {
-	err := b.QueryRowContext(ctx, query.UpdateBankAcc, bank.ID, bank.Number, bank.CardHolder, bank.ExpirationDate, bank.SecurityCode, bank.Metadata).Err()
+	tx, err := b.Begin()
+	if err != nil {
+		return nil, fmt.Errorf("error while creating transacsion: %s", err)
+	}
+
+	err = tx.QueryRowContext(ctx, query.UpdateBankAcc, bank.ID, bank.Number, bank.CardHolder, bank.ExpirationDate, bank.SecurityCodeHash, bank.NonceHex, bank.Metadata).Err()
 	if err != nil {
 		return nil, fmt.Errorf("error while updating bankAcc: %w", err)
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		return nil, fmt.Errorf("error while commiting transacsion: %s", err)
 	}
 
 	return bank, nil
 }
 
 func (b *BankRepository) DeleteById(ctx context.Context, bank *models.BankAccount) error {
-	err := b.QueryRowContext(ctx, query.DeleteBankAcc, bank.ID).Err()
+	tx, err := b.Begin()
+	if err != nil {
+		return fmt.Errorf("error while creating transacsion: %s", err)
+	}
+
+	err = tx.QueryRowContext(ctx, query.DeleteBankAcc, bank.ID).Err()
 	if err != nil {
 		return fmt.Errorf("error while deleting bankAcc: %w", err)
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		return fmt.Errorf("error while commiting transacsion: %s", err)
 	}
 
 	return nil
 }
 
 func (b *BankRepository) DeleteByUsername(ctx context.Context, user *models.User) error {
-	err := b.QueryRowContext(ctx, query.DeleteBankAccByUsername, user.Username).Err()
+	tx, err := b.Begin()
+	if err != nil {
+		return fmt.Errorf("error while creating transacsion: %s", err)
+	}
+
+	err = tx.QueryRowContext(ctx, query.DeleteBankAccByUsername, user.Username).Err()
 	if err != nil {
 		return fmt.Errorf("error while deleting bankAcc: %w", err)
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		return fmt.Errorf("error while commiting transacsion: %s", err)
 	}
 
 	return nil
 }
 
 func (b *BankRepository) DeleteByUserId(ctx context.Context, user models.User) error {
-	err := b.QueryRowContext(ctx, query.DeleteBankAccByUserID, user.ID).Err()
+	tx, err := b.Begin()
+	if err != nil {
+		return fmt.Errorf("error while creating transacsion: %s", err)
+	}
+
+	err = tx.QueryRowContext(ctx, query.DeleteBankAccByUserID, user.ID).Err()
 	if err != nil {
 		return fmt.Errorf("error while deleting bankAcc: %w", err)
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		return fmt.Errorf("error while commiting transacsion: %s", err)
 	}
 
 	return nil

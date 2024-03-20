@@ -24,6 +24,7 @@ CREATE TABLE IF NOT EXISTS GophKepper.pairs
     user_id	   INT REFERENCES GophKepper.users (id) ON DELETE CASCADE,
     login      VARCHAR NOT NULL,
     password_hash   VARCHAR NOT NULL,
+    nonce_hex text NOT NULL,
     metadata   TEXT,
     created_at TIMESTAMP  NOT NULL DEFAULT NOW(),
     updated_at  timestamp NOT NULL DEFAULT NOW()
@@ -58,6 +59,7 @@ CREATE TABLE  IF NOT EXISTS GophKepper.bank
     card_holder varchar NOT NULL,
     expiration_date timestamp NOT NULL,
     security_code varchar NOT NULL,
+    nonce_hex text,
     metadata jsonb,
     created_at  timestamp NOT NULL DEFAULT now(),
     updated_at  timestamp NOT NULL DEFAULT now()

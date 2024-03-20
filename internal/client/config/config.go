@@ -6,19 +6,21 @@ import (
 	"flag"
 	"fmt"
 	"github.com/caarlos0/env/v10"
+	"github.com/dlc-01/GophKeeper/internal/general/logger"
 	"os"
 )
 
 type Config struct {
 	App struct {
-		Name    string `env:"APP_NAME" envDefault:"clientTUI"`
-		Version string `env:"APP_VERSION" envDefault:"0.1"`
+		Name    string `env:"APP_NAME" envDefault:"clientTUI" json:"Name"`
+		Version string `env:"APP_VERSION" envDefault:"0.1" json:"Version"`
 	}
 	Config     string `env:"CONF" envDefault:""`
 	GRPCClient struct {
-		Address string `env:"GRPC_CLIENT_ADDRESS" envDefault:"localhost" json:"GRPCClient"`
-		Port    string `env:"GRPC_SERVER_NETWORK" envDefault:"3200" json:"GRPCNetwork"`
+		Address string `env:"GRPC_CLIENT_ADDRESS" envDefault:"localhost" json:"GRPCClient" json:"GRPCAddress"`
+		Port    string `env:"GRPC_SERVER_NETWORK" envDefault:"3200" json:"GRPCNetwork" json:"GRPCPort"`
 	}
+	Logger logger.ConfLogger
 }
 
 func New() (*Config, error) {

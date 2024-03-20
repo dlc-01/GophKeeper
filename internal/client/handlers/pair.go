@@ -2,7 +2,9 @@ package handlers
 
 import (
 	"context"
-	"github.com/dlc-01/GophKeeper/internal/general/proto"
+	"fmt"
+	"github.com/dlc-01/GophKeeper/internal/general/pass"
+	proto "github.com/dlc-01/GophKeeper/internal/general/proto/gen"
 	"github.com/dlc-01/GophKeeper/internal/server/core/domain/models"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
@@ -19,11 +21,17 @@ func NewPairClient(conn *grpc.ClientConn) *PairClient {
 	}
 }
 
-func (c *PairClient) CreatePair(ctx context.Context, token string, pair models.Pair) (*models.Pair, error) {
+func (c *PairClient) CreatePair(ctx context.Context, token string, secretKey string, pair models.Pair) (*models.Pair, error) {
 	client := proto.NewPairClient(c.conn)
+
+	cipher, err := pass.Encrypt(pass.HashData{Data: pair.PasswordHash, SecretKey: secretKey})
+	if err != nil {
+		return nil, fmt.Errorf("cannot decrypt")
+	}
+
 	req := &proto.CreatePairRequest{
 		Token: token,
-		Pair:  &proto.PairMsg{Login: pair.Username, PasswordHash: pair.PasswordHash, Metadata: pair.Metadata},
+		Pair:  &proto.PairMsg{Login: pair.Username, PasswordHash: cipher.Data, NonceHex: cipher.NonceHex, Metadata: pair.Metadata},
 	}
 
 	ctx, cancel := context.WithDeadline(ctx, time.Now().Add(time.Second))
@@ -40,7 +48,7 @@ func (c *PairClient) CreatePair(ctx context.Context, token string, pair models.P
 	return &pair, nil
 }
 
-func (c *PairClient) GetPair(ctx context.Context, token string) ([]models.Pair, error) {
+func (c *PairClient) GetPair(ctx context.Context, token string, secretKey string) ([]models.Pair, error) {
 	client := proto.NewPairClient(c.conn)
 	req := &proto.GetPairRequest{
 		Token: token,
@@ -59,10 +67,16 @@ func (c *PairClient) GetPair(ctx context.Context, token string) ([]models.Pair, 
 
 	out := make([]models.Pair, len(resp.Pairs))
 	for i, pair := range resp.GetPairs() {
+
+		cipher, err := pass.Decrypt(pass.HashData{Data: pair.GetPasswordHash(), SecretKey: secretKey, NonceHex: pair.GetNonceHex()})
+		if err != nil {
+			return nil, fmt.Errorf("cannot decrypt")
+		}
+
 		out[i] = models.Pair{
 			ID:           pair.GetId(),
 			Username:     pair.GetLogin(),
-			PasswordHash: pair.GetPasswordHash(),
+			PasswordHash: cipher.Data,
 			Metadata:     pair.GetMetadata(),
 		}
 	}

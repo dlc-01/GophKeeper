@@ -2,7 +2,7 @@ package service
 
 import (
 	"context"
-	"github.com/dlc-01/GophKeeper/internal/server/core/domain/logger"
+	"github.com/dlc-01/GophKeeper/internal/general/logger"
 	"github.com/dlc-01/GophKeeper/internal/server/core/domain/models"
 	"github.com/dlc-01/GophKeeper/internal/server/core/domain/projectError"
 	"github.com/dlc-01/GophKeeper/internal/server/core/port"
@@ -10,10 +10,10 @@ import (
 
 type BankService struct {
 	repo port.IBankRepository
-	lgr  logger.Logger
+	lgr  *logger.Logger
 }
 
-func NewBankService(repo port.IBankRepository, lgr logger.Logger) *BankService {
+func NewBankService(repo port.IBankRepository, lgr *logger.Logger) *BankService {
 	return &BankService{
 		repo: repo,
 		lgr:  lgr,

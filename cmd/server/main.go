@@ -3,38 +3,47 @@ package main
 import (
 	"fmt"
 	"github.com/dlc-01/GophKeeper/internal/general/logger"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/dlc-01/GophKeeper/internal/server/adapter/conf"
 
 	"github.com/dlc-01/GophKeeper/internal/server/app"
 
 	"log"
-	"os"
-)
-
-var (
-	lgr *logger.Logger
-	cfg *conf.Config
-	err error
 )
 
 func main() {
-	if cfg, err = conf.InitConf(); err != nil {
+
+	term := make(chan os.Signal, 1)
+	signal.Notify(term, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
+
+	cfg, err := conf.InitConf()
+	if err != nil {
 		log.Fatal("err while parsing conf :%w", err)
 	}
-	if lgr, err = logger.Initialize(logger.ConfigLog{AppMode: cfg.AppMod, LoggerDirectory: cfg.Logger.File.Directory, LoggerFileMaxSize: cfg.Logger.File.MaxSize, LoggerFileCompress: cfg.Logger.File.Compress, LoggerFileMaxBackups: cfg.Logger.File.MaxBackups, LoggerFileMaxAge: cfg.Logger.File.MaxAge}); err != nil {
-		fmt.Println(err.Error())
-		os.Exit(1)
+	lgr, err := logger.Initialize(cfg.Logger)
+	if err != nil {
+		lgr.Fatal(err.Error())
 	}
 
-	appCfg, err := app.New(cfg, lgr)
+	grpcServer, err := app.New(cfg, lgr)
 	if err != nil {
 		lgr.Fatalf("error while starting server: %s", err)
 	}
 
 	lgr.Infof("gRPC run: %s", cfg.GRPCServer.Address)
 
-	if err = appCfg.GrpcSrv.Serve(appCfg.Listener); err != nil {
+	if err = grpcServer.GrpcSrv.Serve(grpcServer.Listener); err != nil {
 		lgr.Fatal(fmt.Errorf("gRPC - Serve: %w", err))
 	}
+
+	<-term
+
+	if err := app.CLose(); err != nil {
+		lgr.Fatalf("error while closing server: %s", err)
+	}
+	
+	lgr.Info("server close")
 }

@@ -3,12 +3,13 @@ package handlers
 import "google.golang.org/grpc"
 
 type Handlers struct {
-	Auth  *AuthClient
-	User  *UserClient
-	Pairs *PairClient
-	Cards *BankClient
-	Notes *TextClient
-	Token string
+	Auth      *AuthClient
+	User      *UserClient
+	Pairs     *PairClient
+	Cards     *BankClient
+	Notes     *TextClient
+	Token     string
+	SecretKey string
 }
 
 func New(conn *grpc.ClientConn) *Handlers {

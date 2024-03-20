@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"context"
-	"github.com/dlc-01/GophKeeper/internal/general/proto"
+	proto "github.com/dlc-01/GophKeeper/internal/general/proto/gen"
 	"github.com/dlc-01/GophKeeper/internal/server/core/domain/models"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"

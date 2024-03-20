@@ -10,17 +10,17 @@ import (
 )
 
 func (v *View) callPairForm(signType Sign) {
-	var regLogin, regPassword, metadata string
+	var pair models.Pair
 	v.tui.pairForm.AddInputField("login", "", 20, nil, func(login string) {
-		regLogin = login
+		pair.Username = login
 	})
 
 	v.tui.pairForm.AddPasswordField("password", "", 20, '*', func(password string) {
-		regPassword = password
+		pair.PasswordHash = password
 	})
 
 	v.tui.pairForm.AddInputField("metadata", "", 20, nil, func(meta string) {
-		metadata = meta
+		pair.Metadata = meta
 	})
 
 	v.tui.pairForm.AddButton("OK", func() {
@@ -28,7 +28,7 @@ func (v *View) callPairForm(signType Sign) {
 
 		switch signType {
 		case register:
-			_, err = v.handlers.Pairs.CreatePair(context.Background(), v.handlers.Token, models.Pair{PasswordHash: regPassword, Username: regLogin, Metadata: metadata})
+			_, err = v.handlers.Pairs.CreatePair(context.Background(), v.handlers.Token, v.handlers.SecretKey, pair)
 		case login:
 
 		default:
@@ -67,7 +67,7 @@ func (v *View) createPairsPage() {
 }
 
 func (v *View) getPairsList() {
-	pairs, err := v.handlers.Pairs.GetPair(context.Background(), v.handlers.Token)
+	pairs, err := v.handlers.Pairs.GetPair(context.Background(), v.handlers.Token, v.handlers.SecretKey)
 	if err != nil {
 		v.switchToUnitsMenu()
 		return

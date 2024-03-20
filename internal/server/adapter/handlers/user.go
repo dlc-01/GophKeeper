@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"context"
-	proto2 "github.com/dlc-01/GophKeeper/internal/general/proto"
+	proto "github.com/dlc-01/GophKeeper/internal/general/proto/gen"
 	"github.com/dlc-01/GophKeeper/internal/server/core/domain/models"
 	"github.com/dlc-01/GophKeeper/internal/server/core/port"
 	"google.golang.org/grpc/codes"
@@ -10,7 +10,7 @@ import (
 )
 
 type UserServer struct {
-	proto2.UnimplementedUserServer
+	proto.UnimplementedUserServer
 	user port.IUsersService
 	auth port.IAuthService
 }
@@ -22,8 +22,8 @@ func NewUserServer(user port.IUsersService, auth port.IAuthService) *UserServer 
 	}
 }
 
-func (s *UserServer) DeleteUser(ctx context.Context, req *proto2.DeleteUserRequest) (*proto2.DeleteUserResponse, error) {
-	var resp proto2.DeleteUserResponse
+func (s *UserServer) DeleteUser(ctx context.Context, req *proto.DeleteUserRequest) (*proto.DeleteUserResponse, error) {
+	var resp proto.DeleteUserResponse
 
 	userID, ok := ctx.Value(UserIDKey).(uint64)
 	if !ok {
@@ -41,8 +41,8 @@ func (s *UserServer) DeleteUser(ctx context.Context, req *proto2.DeleteUserReque
 	return &resp, nil
 }
 
-func (s *UserServer) UpdateUser(ctx context.Context, req *proto2.UpdateUserRequest) (*proto2.UpdateUserResponse, error) {
-	var resp proto2.UpdateUserResponse
+func (s *UserServer) UpdateUser(ctx context.Context, req *proto.UpdateUserRequest) (*proto.UpdateUserResponse, error) {
+	var resp proto.UpdateUserResponse
 
 	userID, ok := ctx.Value(UserIDKey).(uint64)
 	if !ok {
@@ -51,8 +51,8 @@ func (s *UserServer) UpdateUser(ctx context.Context, req *proto2.UpdateUserReque
 
 	newUser := models.User{
 		ID:           &userID,
-		Username:     req.User.Login,
-		PasswordHash: req.User.PasswordHash,
+		Username:     req.User.GetLogin(),
+		PasswordHash: req.User.GetPasswordHash(),
 	}
 
 	users, err := s.user.Update(ctx, &newUser)

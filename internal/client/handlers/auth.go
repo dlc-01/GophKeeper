@@ -2,7 +2,9 @@ package handlers
 
 import (
 	"context"
-	"github.com/dlc-01/GophKeeper/internal/general/proto"
+	"github.com/dlc-01/GophKeeper/internal/general/pass"
+	proto "github.com/dlc-01/GophKeeper/internal/general/proto/gen"
+
 	"google.golang.org/grpc"
 	"time"
 )
@@ -17,12 +19,14 @@ func NewAuthClient(conn *grpc.ClientConn) *AuthClient {
 	}
 }
 
-// TODO: захешируй пароль
-func (c *AuthClient) Register(ctx context.Context, login, password string) (string, error) {
+func (c *AuthClient) Register(ctx context.Context, login, password, key string) (string, error) {
 	client := proto.NewAuthClient(c.conn)
+
+	hashedPass := pass.HashH512Password(pass.HashData{Data: password, SecretKey: key})
+
 	req := &proto.RegisterUserRequest{
 		Login:        login,
-		PasswordHash: password,
+		PasswordHash: hashedPass,
 	}
 
 	ctx, cancel := context.WithDeadline(ctx, time.Now().Add(time.Minute))
@@ -36,14 +40,17 @@ func (c *AuthClient) Register(ctx context.Context, login, password string) (stri
 	return resp.GetToken(), nil
 }
 
-func (c *AuthClient) Login(ctx context.Context, login, password string) (string, error) {
+func (c *AuthClient) Login(ctx context.Context, login, password, key string) (string, error) {
 	client := proto.NewAuthClient(c.conn)
+
+	hashedPass := pass.HashH512Password(pass.HashData{Data: password, SecretKey: key})
+
 	req := &proto.LoginUserRequest{
 		Login:        login,
-		PasswordHash: password,
+		PasswordHash: hashedPass,
 	}
 
-	ctx, cancel := context.WithDeadline(ctx, time.Now().Add(time.Second))
+	ctx, cancel := context.WithDeadline(ctx, time.Now().Add(time.Minute))
 	defer cancel()
 
 	resp, err := client.Login(ctx, req)

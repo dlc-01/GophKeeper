@@ -2,9 +2,10 @@ package app
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"github.com/dlc-01/GophKeeper/internal/general/logger"
-	"github.com/dlc-01/GophKeeper/internal/general/proto"
+	proto "github.com/dlc-01/GophKeeper/internal/general/proto/gen"
 	"github.com/dlc-01/GophKeeper/internal/server/adapter/auth/jwt/manager"
 	"github.com/dlc-01/GophKeeper/internal/server/adapter/conf"
 	"github.com/dlc-01/GophKeeper/internal/server/adapter/handlers"
@@ -19,17 +20,18 @@ import (
 )
 
 var (
-	lgr        *logger.Logger
+	lgrS       *logger.Logger
 	jwtManager *manager.TokenService
+	db         *sql.DB
 )
 
-type AppConf struct {
+type GrpcServer struct {
 	GrpcSrv  *grpc.Server
 	Listener net.Listener
 }
 
-func New(cfg *conf.Config, lgr *logger.Logger) (*AppConf, error) {
-	lgr = lgr
+func New(cfg *conf.Config, lgr *logger.Logger) (*GrpcServer, error) {
+	lgrS = lgr
 	sqlClient, err := postgres.NewSQLClient(*cfg)
 	if err != nil {
 		return nil, err
@@ -55,7 +57,7 @@ func New(cfg *conf.Config, lgr *logger.Logger) (*AppConf, error) {
 		return nil, err
 	}
 
-	jwtManager := manager.NewTokenService(cfg.JWT.SecretKey, cfg.JWT.Expire)
+	jwtManager = manager.NewTokenService(cfg.JWT.SecretKey, cfg.JWT.Expire)
 
 	authModule := service.NewAuthService(userRepository, jwtManager, lgr)
 
@@ -89,7 +91,14 @@ func New(cfg *conf.Config, lgr *logger.Logger) (*AppConf, error) {
 	proto.RegisterPairServer(grpcSrv, pairHandlers)
 	proto.RegisterTextServer(grpcSrv, textHandlers)
 	proto.RegisterBanksServer(grpcSrv, bankHandler)
-	return &AppConf{GrpcSrv: grpcSrv, Listener: listen}, err
+	return &GrpcServer{GrpcSrv: grpcSrv, Listener: listen}, err
+}
+func CLose() error {
+	err := db.Close()
+	if err != nil {
+		return fmt.Errorf("error file closing connection : %w", err)
+	}
+	return nil
 }
 
 func userIdentity(ctx context.Context,
@@ -110,13 +119,13 @@ func userIdentity(ctx context.Context,
 	}
 
 	if token == "" {
-		lgr.Error(fmt.Errorf("missing token in metadata"))
+		lgrS.Error(fmt.Errorf("missing token in metadata"))
 		return nil, status.Error(codes.FailedPrecondition, "missing token")
 	}
 
 	user, err := jwtManager.VerifyToken(token)
 	if err != nil {
-		lgr.Error(fmt.Errorf("user identity: %w", err))
+		lgrS.Error(fmt.Errorf("user identity: %w", err))
 		return nil, status.Error(codes.Aborted, "user identity error")
 	}
 	ctx = context.WithValue(ctx, handlers.UserIDKey, user.ID)

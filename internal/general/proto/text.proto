@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package proto;
 
-option go_package = "GophKeeper/internal/server/adapter/proto";
+option go_package = "GophKeeper/internal/server/adapter/proto/gen/";
 
 message NoteMsg {
   uint64 id = 1;

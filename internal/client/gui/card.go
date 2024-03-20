@@ -7,6 +7,7 @@ import (
 	"github.com/rivo/tview"
 	"strconv"
 	"strings"
+	"time"
 )
 
 func (v *View) callCardForm(signType Sign) {
@@ -22,7 +23,7 @@ func (v *View) callCardForm(signType Sign) {
 	})
 
 	v.tui.cardForm.AddPasswordField("security code", "", 4, '*', func(sec string) {
-		newCardData.SecurityCode = sec
+		newCardData.SecurityCodeHash = sec
 	})
 
 	v.tui.cardForm.AddInputField("explanation date in format 2022-02-24", "", 10, nil, func(data string) {
@@ -43,7 +44,7 @@ func (v *View) callCardForm(signType Sign) {
 				v.tui.body.SwitchToPage(registerFail)
 				return
 			}
-			_, err = v.handlers.Cards.CreateBank(context.Background(), v.handlers.Token, newCardData)
+			_, err = v.handlers.Cards.CreateBank(context.Background(), v.handlers.Token, v.handlers.SecretKey, newCardData)
 		case login:
 
 		default:
@@ -82,7 +83,7 @@ func (v *View) createCardsPage() {
 }
 
 func (v *View) getCardsList() {
-	cards, err := v.handlers.Cards.GetBank(context.Background(), v.handlers.Token)
+	cards, err := v.handlers.Cards.GetBank(context.Background(), v.handlers.Token, v.handlers.SecretKey)
 	if err != nil {
 		v.switchToUnitsMenu()
 		return
@@ -106,9 +107,9 @@ func (v *View) setCardInfo(card models.BankAccount) {
 	sb.WriteString("\n")
 	sb.WriteString("Number: " + strconv.FormatUint(card.Number, 10))
 	sb.WriteString("\n")
-	sb.WriteString("ExplanationDate: " + card.ExpirationDate.String())
+	sb.WriteString("ExplanationDate: " + card.ExpirationDate.Format(time.DateOnly))
 	sb.WriteString("\n")
-	sb.WriteString("Security code: " + card.SecurityCode)
+	sb.WriteString("Security code: " + card.SecurityCodeHash)
 	sb.WriteString("\n")
 	sb.WriteString("Metadata: " + card.Metadata)
 	sb.WriteString("\n")

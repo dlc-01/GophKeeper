@@ -2,20 +2,20 @@ package service
 
 import (
 	"context"
+	"github.com/dlc-01/GophKeeper/internal/general/logger"
 	"github.com/dlc-01/GophKeeper/internal/general/pass"
-	"github.com/dlc-01/GophKeeper/internal/server/core/domain/logger"
 	"github.com/dlc-01/GophKeeper/internal/server/core/domain/models"
 	"github.com/dlc-01/GophKeeper/internal/server/core/domain/projectError"
 	"github.com/dlc-01/GophKeeper/internal/server/core/port"
 )
 
 type AuthService struct {
-	log  logger.Logger
+	log  *logger.Logger
 	repo port.IUsersRepository
 	ts   port.ITokenService
 }
 
-func NewAuthService(repo port.IUsersRepository, ts port.ITokenService, log logger.Logger) *AuthService {
+func NewAuthService(repo port.IUsersRepository, ts port.ITokenService, log *logger.Logger) *AuthService {
 	return &AuthService{
 		log,
 		repo,

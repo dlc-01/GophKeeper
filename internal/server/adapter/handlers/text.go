@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"context"
-	proto2 "github.com/dlc-01/GophKeeper/internal/general/proto"
+	proto "github.com/dlc-01/GophKeeper/internal/general/proto/gen"
 	"github.com/dlc-01/GophKeeper/internal/server/core/domain/models"
 	"github.com/dlc-01/GophKeeper/internal/server/core/port"
 	"google.golang.org/grpc/codes"
@@ -10,7 +10,7 @@ import (
 )
 
 type TextServer struct {
-	proto2.UnimplementedTextServer
+	proto.UnimplementedTextServer
 	text port.ITextService
 }
 
@@ -20,8 +20,8 @@ func NewTextServer(text port.ITextService) *TextServer {
 	}
 }
 
-func (t *TextServer) CreateText(ctx context.Context, req *proto2.CreateTextRequest) (*proto2.CreateTextResponse, error) {
-	var resp proto2.CreateTextResponse
+func (t *TextServer) CreateText(ctx context.Context, req *proto.CreateTextRequest) (*proto.CreateTextResponse, error) {
+	var resp proto.CreateTextResponse
 
 	userID, ok := ctx.Value(UserIDKey).(uint64)
 	if !ok {
@@ -48,8 +48,8 @@ func (t *TextServer) CreateText(ctx context.Context, req *proto2.CreateTextReque
 	return &resp, nil
 }
 
-func (t *TextServer) GetText(ctx context.Context, req *proto2.GetTextRequest) (*proto2.GetTextResponse, error) {
-	var resp proto2.GetTextResponse
+func (t *TextServer) GetText(ctx context.Context, req *proto.GetTextRequest) (*proto.GetTextResponse, error) {
+	var resp proto.GetTextResponse
 
 	userID, ok := ctx.Value(UserIDKey).(uint64)
 	if !ok {
@@ -66,7 +66,7 @@ func (t *TextServer) GetText(ctx context.Context, req *proto2.GetTextRequest) (*
 	}
 
 	for _, note := range *stored {
-		resp.Notes = append(resp.Notes, &proto2.NoteMsg{
+		resp.Notes = append(resp.Notes, &proto.NoteMsg{
 			Id:       note.ID,
 			Note:     note.Note,
 			Metadata: note.Metadata,
@@ -76,8 +76,8 @@ func (t *TextServer) GetText(ctx context.Context, req *proto2.GetTextRequest) (*
 	return &resp, nil
 }
 
-func (t *TextServer) UpdateText(ctx context.Context, req *proto2.UpdateTextRequest) (*proto2.UpdateTextResponse, error) {
-	var resp proto2.UpdateTextResponse
+func (t *TextServer) UpdateText(ctx context.Context, req *proto.UpdateTextRequest) (*proto.UpdateTextResponse, error) {
+	var resp proto.UpdateTextResponse
 
 	_, ok := ctx.Value(UserIDKey).(uint64)
 	if !ok {
@@ -85,9 +85,9 @@ func (t *TextServer) UpdateText(ctx context.Context, req *proto2.UpdateTextReque
 	}
 
 	text := models.Text{
-		ID:       req.Note.Id,
-		Note:     req.Note.Note,
-		Metadata: req.Note.Metadata,
+		ID:       req.Note.GetId(),
+		Note:     req.Note.GetNote(),
+		Metadata: req.Note.GetMetadata(),
 	}
 
 	_, err := t.text.Update(ctx, text)
@@ -100,8 +100,8 @@ func (t *TextServer) UpdateText(ctx context.Context, req *proto2.UpdateTextReque
 	return &resp, nil
 }
 
-func (t *TextServer) DeleteText(ctx context.Context, req *proto2.DeleteTextRequest) (*proto2.DeleteTextResponse, error) {
-	var resp proto2.DeleteTextResponse
+func (t *TextServer) DeleteText(ctx context.Context, req *proto.DeleteTextRequest) (*proto.DeleteTextResponse, error) {
+	var resp proto.DeleteTextResponse
 
 	userID, ok := ctx.Value(UserIDKey).(uint64)
 	if !ok {

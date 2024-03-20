@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package proto;
 
-option go_package = "GophKeeper/internal/server/adapter/proto";
+option go_package = "GophKeeper/internal/server/adapter/proto/gen/";
 
 message CardMsg {
   uint64 id = 1;
@@ -10,7 +10,8 @@ message CardMsg {
   uint64 number = 3;
   string expiration_date = 4;
   string metadata = 5;
-  string security_code = 6;
+  string security_code_hash = 6;
+  string nonce_hex = 7;
 }
 
 message CreateBankRequest {

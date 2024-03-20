@@ -112,15 +112,19 @@ func (v *View) callSignForm(signType Sign) {
 		regPassword = password
 	})
 
+	v.tui.signForm.AddPasswordField("secretKey", "", 20, '*', func(secretKey string) {
+		v.handlers.SecretKey = secretKey
+	})
+
 	v.tui.signForm.AddButton("OK", func() {
 		var token string
 		var err error
 
 		switch signType {
 		case register:
-			token, err = v.handlers.Auth.Register(context.Background(), regLogin, regPassword)
+			token, err = v.handlers.Auth.Register(context.Background(), regLogin, regPassword, v.handlers.SecretKey)
 		case login:
-			token, err = v.handlers.Auth.Login(context.Background(), regLogin, regPassword)
+			token, err = v.handlers.Auth.Login(context.Background(), regLogin, regPassword, v.handlers.SecretKey)
 		default:
 			v.switchToMainMenu()
 		}

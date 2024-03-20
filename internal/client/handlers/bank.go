@@ -2,7 +2,9 @@ package handlers
 
 import (
 	"context"
-	"github.com/dlc-01/GophKeeper/internal/general/proto"
+	"fmt"
+	"github.com/dlc-01/GophKeeper/internal/general/pass"
+	proto "github.com/dlc-01/GophKeeper/internal/general/proto/gen"
 	"github.com/dlc-01/GophKeeper/internal/server/core/domain/models"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -21,11 +23,17 @@ func NewBankClient(conn *grpc.ClientConn) *BankClient {
 	}
 }
 
-func (c *BankClient) CreateBank(ctx context.Context, token string, card models.BankAccountString) (*models.BankAccountString, error) {
+func (c *BankClient) CreateBank(ctx context.Context, token, secretKey string, card models.BankAccountString) (*models.BankAccountString, error) {
 	client := proto.NewBanksClient(c.conn)
+
+	cipher, err := pass.Encrypt(pass.HashData{Data: card.SecurityCodeHash, SecretKey: secretKey})
+	if err != nil {
+		return nil, fmt.Errorf("cannot decrypt")
+	}
+
 	req := &proto.CreateBankRequest{
 		Token: token,
-		Card:  &proto.CardMsg{CardHolder: card.CardHolder, Number: card.Number, ExpirationDate: card.ExpirationDate, Metadata: card.Metadata, SecurityCode: card.SecurityCode},
+		Card:  &proto.CardMsg{CardHolder: card.CardHolder, Number: card.Number, ExpirationDate: card.ExpirationDate, Metadata: card.Metadata, SecurityCodeHash: cipher.Data, NonceHex: cipher.NonceHex},
 	}
 
 	ctx, cancel := context.WithDeadline(ctx, time.Now().Add(time.Second))
@@ -41,7 +49,7 @@ func (c *BankClient) CreateBank(ctx context.Context, token string, card models.B
 	return &card, nil
 }
 
-func (c *BankClient) GetBank(ctx context.Context, token string) ([]models.BankAccount, error) {
+func (c *BankClient) GetBank(ctx context.Context, token, secretKey string) ([]models.BankAccount, error) {
 	client := proto.NewBanksClient(c.conn)
 	req := &proto.GetBankRequest{
 		Token: token,
@@ -59,28 +67,39 @@ func (c *BankClient) GetBank(ctx context.Context, token string) ([]models.BankAc
 
 	out := make([]models.BankAccount, len(resp.Cards))
 	for i, card := range resp.GetCards() {
-		data := card.ExpirationDate[:10]
-		date, err := time.Parse("2006-01-02", data)
+		date, err := time.Parse("2006-01-02 15:04:05 -0700 MST", card.GetExpirationDate())
 		if err != nil {
 			return nil, status.Error(codes.Aborted, "cannot parse ExpirationDate")
 		}
+
+		cipher, err := pass.Decrypt(pass.HashData{Data: card.GetSecurityCodeHash(), SecretKey: secretKey, NonceHex: card.GetNonceHex()})
+		if err != nil {
+			return nil, fmt.Errorf("cannot decrypt")
+		}
+
 		out[i] = models.BankAccount{
-			ID:             card.GetId(),
-			CardHolder:     card.GetCardHolder(),
-			Number:         card.GetNumber(),
-			ExpirationDate: date,
-			Metadata:       card.GetMetadata(),
-			SecurityCode:   card.GetSecurityCode(),
+			ID:               card.GetId(),
+			CardHolder:       card.GetCardHolder(),
+			Number:           card.GetNumber(),
+			ExpirationDate:   date,
+			Metadata:         card.GetMetadata(),
+			SecurityCodeHash: cipher.Data,
 		}
 	}
 
 	return out, nil
 }
 
-func (c *BankClient) UpdateBank(ctx context.Context, card models.BankAccount) (*models.BankAccount, error) {
+func (c *BankClient) UpdateBank(ctx context.Context, card models.BankAccount, secretKey string) (*models.BankAccount, error) {
 	client := proto.NewBanksClient(c.conn)
+
+	cipher, err := pass.Encrypt(pass.HashData{Data: card.SecurityCodeHash, SecretKey: secretKey})
+	if err != nil {
+		return nil, fmt.Errorf("cannot decrypt")
+	}
+
 	req := &proto.UpdateBankRequest{
-		Card: &proto.CardMsg{CardHolder: card.CardHolder, Number: card.Number, ExpirationDate: card.ExpirationDate.String(), Metadata: card.Metadata},
+		Card: &proto.CardMsg{CardHolder: card.CardHolder, Number: card.Number, ExpirationDate: card.ExpirationDate.String(), Metadata: card.Metadata, SecurityCodeHash: cipher.Data, NonceHex: cipher.NonceHex},
 	}
 
 	ctx, cancel := context.WithDeadline(ctx, time.Now().Add(time.Second))

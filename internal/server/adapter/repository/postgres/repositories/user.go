@@ -26,7 +26,13 @@ func NewUserRepository(lgr *logger.Logger, client *sql.DB) (*UserRepository, err
 
 func (u *UserRepository) Create(ctx context.Context, user *models.User) (*models.User, error) {
 	var stored models.User
-	err := u.QueryRowContext(ctx, query.CreateUser, user.Username, user.PasswordHash).
+
+	tx, err := u.Begin()
+	if err != nil {
+		return nil, fmt.Errorf("error while creating transacsion: %s", err)
+	}
+
+	err = tx.QueryRowContext(ctx, query.CreateUser, user.Username, user.PasswordHash).
 		Scan(&stored.ID,
 			&stored.Username,
 			&stored.PasswordHash)
@@ -38,12 +44,23 @@ func (u *UserRepository) Create(ctx context.Context, user *models.User) (*models
 		return nil, fmt.Errorf("error while creating user: %w", err)
 	}
 
+	err = tx.Commit()
+	if err != nil {
+		return nil, fmt.Errorf("error while commiting transacsion: %s", err)
+	}
+
 	return &stored, nil
 }
 
 func (u *UserRepository) GetByUserID(ctx context.Context, user *models.User) (*models.User, error) {
 	var stored models.User
-	err := u.QueryRowContext(ctx, query.GetUserByID, user.ID).
+
+	tx, err := u.Begin()
+	if err != nil {
+		return nil, fmt.Errorf("error while creating transacsion: %s", err)
+	}
+
+	err = tx.QueryRowContext(ctx, query.GetUserByID, user.ID).
 		Scan(&stored.ID,
 			&stored.Username,
 			&stored.PasswordHash)
@@ -54,14 +71,26 @@ func (u *UserRepository) GetByUserID(ctx context.Context, user *models.User) (*m
 		return nil, fmt.Errorf("error while geting user: %w", err)
 	}
 
+	err = tx.Commit()
+	if err != nil {
+		return nil, fmt.Errorf("error while commiting transacsion: %s", err)
+	}
+
 	return &stored, nil
 }
 
 func (u *UserRepository) GetByUsername(ctx context.Context, user *models.User) (*models.User, error) {
-	err := u.QueryRowContext(ctx, query.GetUserByUsername, user.Username).
-		Scan(&user.ID,
-			&user.Username,
-			&user.PasswordHash)
+	var stored models.User
+
+	tx, err := u.Begin()
+	if err != nil {
+		return nil, fmt.Errorf("error while creating transacsion: %s", err)
+	}
+
+	err = tx.QueryRowContext(ctx, query.GetUserByUsername, user.Username).
+		Scan(&stored.ID,
+			&stored.Username,
+			&stored.PasswordHash)
 	if err != nil {
 		if err == pgx.ErrNoRows {
 			return nil, projectError.ErrDataNotFound
@@ -69,11 +98,21 @@ func (u *UserRepository) GetByUsername(ctx context.Context, user *models.User) (
 		return nil, fmt.Errorf("error while geting user: %w", err)
 	}
 
-	return user, nil
+	err = tx.Commit()
+	if err != nil {
+		return nil, fmt.Errorf("error while commiting transacsion: %s", err)
+	}
+
+	return &stored, nil
 }
 
 func (u *UserRepository) Update(ctx context.Context, user *models.User) (*models.User, error) {
-	err := u.QueryRowContext(ctx, query.UpdateUser, user.Username, user.PasswordHash, user.ID).Err()
+	tx, err := u.Begin()
+	if err != nil {
+		return nil, fmt.Errorf("error while creating transacsion: %s", err)
+	}
+
+	err = tx.QueryRowContext(ctx, query.UpdateUser, user.Username, user.PasswordHash, user.ID).Err()
 	if err != nil {
 		if errCode := pq.ErrorCode(err.Error()); errCode == "23505" {
 			return nil, projectError.ErrConflictingData
@@ -81,16 +120,31 @@ func (u *UserRepository) Update(ctx context.Context, user *models.User) (*models
 		return nil, fmt.Errorf("error while updating user: %w", err)
 	}
 
+	err = tx.Commit()
+	if err != nil {
+		return nil, fmt.Errorf("error while commiting transacsion: %s", err)
+	}
+
 	return user, nil
 }
 
 func (u *UserRepository) Delete(ctx context.Context, user *models.User) (*models.User, error) {
-	err := u.QueryRowContext(ctx, query.DeleteUsers, user.ID).Err()
+	tx, err := u.Begin()
+	if err != nil {
+		return nil, fmt.Errorf("error while creating transacsion: %s", err)
+	}
+
+	err = tx.QueryRowContext(ctx, query.DeleteUsers, user.ID).Err()
 	if err != nil {
 		if err == pgx.ErrNoRows {
 			return nil, projectError.ErrDataNotFound
 		}
 		return nil, fmt.Errorf("error while deleting user: %w", err)
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		return nil, fmt.Errorf("error while commiting transacsion: %s", err)
 	}
 
 	return user, nil

@@ -2,18 +2,18 @@ package service
 
 import (
 	"context"
-	"github.com/dlc-01/GophKeeper/internal/server/core/domain/logger"
+	"github.com/dlc-01/GophKeeper/internal/general/logger"
 	"github.com/dlc-01/GophKeeper/internal/server/core/domain/models"
 	"github.com/dlc-01/GophKeeper/internal/server/core/domain/projectError"
 	"github.com/dlc-01/GophKeeper/internal/server/core/port"
 )
 
 type UserService struct {
-	log  logger.Logger
+	log  *logger.Logger
 	repo port.IUsersRepository
 }
 
-func NewUserService(repo port.IUsersRepository, log logger.Logger) *UserService {
+func NewUserService(repo port.IUsersRepository, log *logger.Logger) *UserService {
 	return &UserService{
 		log,
 		repo,

@@ -5,4 +5,5 @@ type Pair struct {
 	Username     string
 	PasswordHash string
 	Metadata     string
+	NonceHex     string
 }
