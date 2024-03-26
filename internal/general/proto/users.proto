@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package proto;
+
+option go_package = "GophKeeper/internal/server/adapter/proto/gen/";
+
+message UserRequest {
+  string login = 1;
+  string password_hash = 2;
+}
+
+message UpdateUserRequest {
+  string token = 1;
+  UserRequest user =2;
+}
+
+message DeleteUserRequest {
+  string token = 1;
+}
+
+message UpdateUserResponse{
+  string token = 1;
+  string error = 2;
+}
+
+message DeleteUserResponse{
+  string error = 1;
+}
+
+service User {
+  rpc DeleteUser(DeleteUserRequest) returns (DeleteUserResponse);
+  rpc UpdateUser(UpdateUserRequest) returns (UpdateUserResponse);
+}

@@ -1,0 +1,58 @@
+syntax = "proto3";
+
+package proto;
+
+option go_package = "GophKeeper/internal/server/adapter/proto/gen/";
+
+message CardMsg {
+  uint64 id = 1;
+  string card_holder = 2;
+  uint64 number = 3;
+  string expiration_date = 4;
+  string metadata = 5;
+  string security_code_hash = 6;
+  string nonce_hex = 7;
+}
+
+message CreateBankRequest {
+  string token = 1;
+  CardMsg card = 2;
+}
+
+message CreateBankResponse {
+  CardMsg card = 1;
+  string error = 2;
+}
+
+message GetBankRequest {
+  string  token = 1;
+}
+
+message GetBankResponse {
+  repeated CardMsg cards = 1;
+  string error = 2;
+}
+
+message UpdateBankRequest{
+  CardMsg card = 1;
+}
+
+message UpdateBankResponse {
+  CardMsg card = 1;
+  string error = 2;
+}
+
+message DeleteBankRequest {
+  string  token = 1;
+}
+
+message DeleteBankResponse{
+  string error = 1;
+}
+
+service Banks {
+  rpc CreateBank(CreateBankRequest) returns (CreateBankResponse);
+  rpc GetBank(GetBankRequest) returns (GetBankResponse);
+  rpc UpdateBank(UpdateBankRequest) returns (UpdateBankResponse);
+  rpc DeleteBank(DeleteBankRequest) returns (DeleteBankResponse);
+}
